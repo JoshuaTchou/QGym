@@ -2,6 +2,7 @@ from gym.envs import __init__  # noqa: F401
 from gym.utils import get_args, task_registry
 from gym.utils import KeyboardInterface
 from gym.utils import VisualizationRecorder
+import plot_rewards
 
 # torch needs to be imported after isaacgym imports in local source
 import torch
@@ -10,22 +11,12 @@ import numpy as np
 BASE_HEIGHT_REF = 1.0
 
 
+# get names of all rewards
 def get_reward_fns(env):
-    requested = [
-        "tracking_height",
-        "tendon_constraints",
-        "tracking_lin_vel",
-        "swing_grf",
-        "stance_grf",
-    ]
-
     out = {}
-    for name in requested:
-        fn_name = f"_reward_{name}"
-        if hasattr(env, fn_name):
-            out[name] = getattr(env, fn_name)
-        else:
-            print(f"reward not found (skipping): {fn_name}")
+    for attr_name in dir(env):
+        if attr_name[:8] == "_reward_":
+            out[attr_name] = getattr(env, attr_name)
     return out
 
 
@@ -235,6 +226,9 @@ def play(env, runner, train_cfg):
             else:
                 reward_log_cpu[k] = v
         np.savez_compressed("reward_logs.npz", **reward_log_cpu)
+
+        # plot rewards
+        plot_rewards.main()
 
 
 if __name__ == "__main__":
