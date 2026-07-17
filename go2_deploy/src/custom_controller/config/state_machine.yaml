@@ -1,0 +1,3 @@
+custom_controller:
+  ros__parameters:
+    watchdog_timeout_s: 0.5
